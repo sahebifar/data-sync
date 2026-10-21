@@ -1,0 +1,9 @@
+.git
+.github
+.env
+certs
+*.exe
+*.test
+*.out
+.vscode
+.idea

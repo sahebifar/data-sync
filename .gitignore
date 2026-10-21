@@ -1,0 +1,25 @@
+# Secrets — never commit these
+.env
+.env.*
+!.env.example
+certs/
+
+# Go build artifacts
+*.exe
+*.exe~
+*.test
+*.out
+data-sync
+data-sync.exe
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

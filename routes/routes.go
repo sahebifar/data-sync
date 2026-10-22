@@ -10,6 +10,7 @@ import (
 func SetupRoutes(postgresDB, yugabyteDB *sql.DB) {
 	http.Handle("/api/health", http.HandlerFunc(healthHandler))
 	http.Handle("/api/users", handlers.UsersHandler(postgresDB))
+	http.Handle("/api/users/yugabyte", handlers.UsersHandler(yugabyteDB))
 	http.Handle("/api/users/create", handlers.CreateUserHandler(postgresDB, yugabyteDB))
 	http.Handle("/api/users/update", handlers.UpdateUserHandler(postgresDB, yugabyteDB))
 	http.Handle("/api/users/delete", handlers.DeleteUserHandler(postgresDB, yugabyteDB))

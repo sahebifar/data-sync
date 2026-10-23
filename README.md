@@ -132,6 +132,17 @@ go test ./... -v
 
 No running database is required for the test suite.
 
+
+## Screenshots
+
+| Overview | Users |
+|---|---|
+| ![Overview](docs/screenshots/overview.png) | ![Users](docs/screenshots/users.png) |
+
+| Compare | Outbox |
+|---|---|
+| ![Compare](docs/screenshots/compare.png) | ![Outbox](docs/screenshots/outbox.png) |
+
 ## CI/CD
 
 - **CI** — on every push: `go vet`, `go build`, `go test`.

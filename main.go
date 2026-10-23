@@ -15,8 +15,7 @@ import (
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		fmt.Println("Error loading .env:", err)
-		return
+		fmt.Println("No .env file found, using environment variables")
 	}
 
 	postgresDB := database.Connect()

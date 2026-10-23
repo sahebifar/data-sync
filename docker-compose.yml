@@ -1,0 +1,66 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: data_sync
+    ports:
+      - "5434:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  yugabyte:
+    image: yugabytedb/yugabyte:latest
+    command: bin/yugabyted start --daemon=false --listen 0.0.0.0 --tserver_flags 'pgsql_proxy_bind_address=0.0.0.0'
+    ports:
+      - "5435:5433"
+      - "7000:7000"
+      - "9000:9000"
+    volumes:
+      - yb_data:/home/yugabyte/yb_data
+    healthcheck:
+      test: ["CMD-SHELL", "bin/ysqlsh -h 127.0.0.1 -p 5433 -U yugabyte -d yugabyte -c 'SELECT 1' || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 30
+      start_period: 90s
+
+  backend:
+    build: .
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: data_sync
+      YUGABYTE_HOST: yugabyte
+      YUGABYTE_PORT: "5433"
+      YUGABYTE_USER: yugabyte
+      YUGABYTE_PASSWORD: ""
+      YUGABYTE_DB: yugabyte
+      YUGABYTE_SSLMODE: disable
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      yugabyte:
+        condition: service_healthy
+    restart: on-failure
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  pg_data:
+  yb_data:

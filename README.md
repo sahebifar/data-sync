@@ -67,19 +67,23 @@ Client (React) ──► Go Backend ──► PostgreSQL (source of truth)
 
 ```
 .
-├── .github/workflows/     CI + CD pipelines
+├── .github/workflows/          CI + CD pipelines
 ├── database/
-│   ├── database.go        PostgreSQL connection
-│   ├── yugabyte.go        YugabyteDB connection
-│   ├── migrate.go         Embedded SQL migration runner
-│   ├── migrations/        Versioned SQL per database
-│   ├── outbox.go          Enqueue within caller's transaction
-│   └── outbox_worker.go   Background sync worker
-├── handlers/              HTTP handlers + unit tests (sqlmock)
-├── models/                Data models
-├── routes/                Route registration
-├── frontend/              React + TypeScript + Tailwind dashboard
-├── Dockerfile
+│   ├── database.go             PostgreSQL connection
+│   ├── yugabyte.go             YugabyteDB connection
+│   ├── migrate.go              Embedded SQL migration runner
+│   ├── migrations/             Versioned SQL per database
+│   ├── outbox.go               Enqueue within caller's transaction
+│   └── outbox_worker.go        Background sync worker
+├── handlers/                   HTTP handlers + unit tests (sqlmock)
+├── models/                     Data models
+├── routes/                     Route registration
+├── frontend/                   React + TypeScript + Tailwind dashboard
+│   ├── Dockerfile              Nginx-served production image
+│   └── nginx.conf              Proxies /api/* to the Go backend
+├── docs/screenshots/           Dashboard screenshots
+├── Dockerfile                  Multi-stage backend image
+├── docker-compose.yml          Full-stack local stack
 ├── .env.example
 └── main.go
 ```
@@ -120,6 +124,40 @@ npm run dev
 
 Frontend runs on `http://localhost:5173`. Vite proxies `/api/*` to the backend, so no CORS configuration is needed.
 
+## Running with Docker Compose
+
+The easiest way to run the full stack is with Docker Compose:
+
+```bash
+docker compose up --build
+```
+
+This starts four services:
+
+| Service | URL |
+|---|---|
+| Frontend (React + Nginx) | http://localhost:3000 |
+| Backend (Go API) | http://localhost:8080 |
+| PostgreSQL | localhost:5434 |
+| YugabyteDB (YSQL) | localhost:5435 |
+
+Data is persisted in two named volumes (`pg_data` and `yb_data`), so restarting the stack does not lose data. To reset both databases:
+
+```bash
+docker compose down -v
+```
+
+Useful commands:
+
+```bash
+docker compose ps                 # service status
+docker compose logs -f backend    # follow backend logs
+docker compose stop               # stop all containers
+docker compose up -d              # start again in background
+```
+
+> **Note:** Ports 5434 and 5435 are used on the host to avoid conflicts with locally installed PostgreSQL (5432) and YugabyteDB (5433).
+
 ## Testing
 
 ```bash
@@ -131,7 +169,6 @@ go test ./... -v
 - `models/user_test.go` — model field tests
 
 No running database is required for the test suite.
-
 
 ## Screenshots
 
